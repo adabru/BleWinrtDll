@@ -1,0 +1,8 @@
+
+.vs/
+bin/
+obj/
+Debug/
+x64/
+
+*.aps
