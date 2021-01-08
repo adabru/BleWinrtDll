@@ -1,3 +1,5 @@
+tldr: For a headstart just try out [Joelx's Unity Ble Demo](https://github.com/Joelx/BleWinrtDll-Unity-Demo).
+
 # UWP BLE packed as C++ winrt dll
 
 This VisualStudio-project compiles to a C++-dll that can be imported into Unity. With this dll there is no need to create a UWP anymore to use BLE on Windows. Also no conditional compiling is needed. You can even use Unity Editor's play-button with this dll. 
