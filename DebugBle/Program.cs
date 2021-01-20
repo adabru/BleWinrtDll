@@ -43,10 +43,15 @@ namespace DebugBle
                     "{f6f07da4-9a61-11e9-a2a3-2a2ae2dbcce4}",
                     "{f6f07ed0-9a61-11e9-a2a3-2a2ae2dbcce4}" });
 
-            for(int guard = 0; guard < 120; guard++)
+            for(int guard = 0; guard < 2000; guard++)
             {
                 BLE.ReadPackage();
-                Thread.Sleep(500);
+                BLE.WritePackage(deviceId,
+                    "{f6f04ffa-9a61-11e9-a2a3-2a2ae2dbcce4}",
+                    "{f6f07ffc-9a61-11e9-a2a3-2a2ae2dbcce4}",
+                    new byte[] { 0, 1, 2 });
+                Console.WriteLine(BLE.GetError());
+                Thread.Sleep(5);
             }
 
             Console.WriteLine("Press enter to exit the program...");

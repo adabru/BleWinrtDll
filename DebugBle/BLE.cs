@@ -65,7 +65,7 @@ public class BLE
         public static extern ScanStatus PollCharacteristic(out Characteristic characteristic, bool block);
 
         [DllImport("BleWinrtDll.dll", EntryPoint = "SubscribeCharacteristic", CharSet = CharSet.Unicode)]
-        public static extern bool SubscribeCharacteristic(string deviceId, string serviceId, string characteristicId);
+        public static extern bool SubscribeCharacteristic(string deviceId, string serviceId, string characteristicId, bool block);
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
         public struct BLEData
@@ -86,7 +86,7 @@ public class BLE
         public static extern bool PollData(out BLEData data, bool block);
 
         [DllImport("BleWinrtDll.dll", EntryPoint = "SendData")]
-        public static extern bool SendData(BLEData data);
+        public static extern bool SendData(in BLEData data, bool block);
 
         [DllImport("BleWinrtDll.dll", EntryPoint = "Quit")]
         public static extern void Quit();
@@ -135,18 +135,24 @@ public class BLE
             Impl.StartDeviceScan();
             Impl.DeviceUpdate res = new Impl.DeviceUpdate();
             List<string> deviceIds = new List<string>();
-            Dictionary<string, string> deviceNames = new Dictionary<string, string>();
+            Dictionary<string, string> deviceName = new Dictionary<string, string>();
+            Dictionary<string, bool> deviceIsConnectable = new Dictionary<string, bool>();
             Impl.ScanStatus status;
             while (Impl.PollDevice(out res, true) != Impl.ScanStatus.FINISHED)
             {
-                if (res.nameUpdated)
+                if (!deviceIds.Contains(res.id))
                 {
                     deviceIds.Add(res.id);
-                    deviceNames.Add(res.id, res.name);
+                    deviceName[res.id] = "";
+                    deviceIsConnectable[res.id] = false;
                 }
+                if (res.nameUpdated)
+                    deviceName[res.id] = res.name;
+                if (res.isConnectableUpdated)
+                    deviceIsConnectable[res.id] = res.isConnectable;
                 // connectable device
-                if (deviceIds.Contains(res.id) && res.isConnectable)
-                    currentScan.Found?.Invoke(res.id, deviceNames[res.id]);
+                if (deviceName[res.id] != "" && deviceIsConnectable[res.id] == true)
+                    currentScan.Found?.Invoke(res.id, deviceName[res.id]);
                 // check if scan was cancelled in callback
                 if (currentScan.cancelled)
                     break;
@@ -172,11 +178,11 @@ public class BLE
             Debug.Log("characteristic found: " + c.uuid + ", user description: " + c.userDescription);
     }
 
-    public static bool Subscribe(string deviceId, string serviceUuids, string[] characteristicUuids)
+    public static bool Subscribe(string deviceId, string serviceUuid, string[] characteristicUuids)
     {
         foreach (string characteristicUuid in characteristicUuids)
         {
-            bool res = Impl.SubscribeCharacteristic(deviceId, serviceUuids, characteristicUuid);
+            bool res = Impl.SubscribeCharacteristic(deviceId, serviceUuid, characteristicUuid, true);
             if (!res)
                 return false;
         }
@@ -207,7 +213,9 @@ public class BLE
         packageSend.deviceId = deviceId;
         packageSend.serviceUuid = serviceUuid;
         packageSend.characteristicUuid = characteristicUuid;
-        return Impl.SendData(packageSend);
+        for (int i = 0; i < data.Length; i++)
+            packageSend.buf[i] = data[i];
+        return Impl.SendData(in packageSend, true);
     }
 
     public static void ReadPackage()

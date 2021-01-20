@@ -49,11 +49,11 @@ extern "C" {
 
 	__declspec(dllexport) ScanStatus PollCharacteristic(Characteristic* characteristic, bool block);
 
-	__declspec(dllexport) bool SubscribeCharacteristic(wchar_t* deviceId, wchar_t* serviceId, wchar_t* characteristicId);
+	__declspec(dllexport) bool SubscribeCharacteristic(wchar_t* deviceId, wchar_t* serviceId, wchar_t* characteristicId, bool block);
 
 	__declspec(dllexport) bool PollData(BLEData* data, bool block);
 
-	__declspec(dllexport) bool SendData(BLEData* data);
+	__declspec(dllexport) bool SendData(BLEData* data, bool block);
 
 	__declspec(dllexport) void Quit();
 

@@ -480,7 +480,6 @@ void Characteristic_ValueChanged(GattCharacteristic const& characteristic, GattV
 	}
 }
 fire_and_forget SubscribeCharacteristicAsync(wchar_t* deviceId, wchar_t* serviceId, wchar_t* characteristicId, bool* result) {
-	*result = false;
 	try {
 		auto characteristic = co_await retrieveCharacteristic(deviceId, serviceId, characteristicId);
 		if (characteristic != nullptr) {
@@ -492,7 +491,8 @@ fire_and_forget SubscribeCharacteristicAsync(wchar_t* deviceId, wchar_t* service
 				subscription->characteristic = characteristic;
 				subscription->revoker = characteristic.ValueChanged(auto_revoke, &Characteristic_ValueChanged);
 				subscriptions.push_back(subscription);
-				*result = true;
+				if (result != 0)
+					*result = true;
 			}
 		}
 	}
@@ -502,11 +502,11 @@ fire_and_forget SubscribeCharacteristicAsync(wchar_t* deviceId, wchar_t* service
 	}
 	subscribeQueueSignal.notify_one();
 }
-bool SubscribeCharacteristic(wchar_t* deviceId, wchar_t* serviceId, wchar_t* characteristicId) {
+bool SubscribeCharacteristic(wchar_t* deviceId, wchar_t* serviceId, wchar_t* characteristicId, bool block) {
 	unique_lock<mutex> lock(subscribeQueueLock);
-	bool result;
-	SubscribeCharacteristicAsync(deviceId, serviceId, characteristicId, &result);
-	if (QuittableWait(subscribeQueueSignal, lock))
+	bool result = false;
+	SubscribeCharacteristicAsync(deviceId, serviceId, characteristicId, block ? &result : 0);
+	if (block && QuittableWait(subscribeQueueSignal, lock))
 		return false;
 
 	return result;
@@ -525,19 +525,18 @@ bool PollData(BLEData* data, bool block) {
 	return false;
 }
 
-fire_and_forget SendDataAsync(BLEData* data, condition_variable& signal, bool* result) {
-	*result = false;
+fire_and_forget SendDataAsync(BLEData data, condition_variable* signal, bool* result) {
 	try {
-		auto characteristic = co_await retrieveCharacteristic(data->deviceId, data->serviceUuid, data->characteristicUuid);
+		auto characteristic = co_await retrieveCharacteristic(data.deviceId, data.serviceUuid, data.characteristicUuid);
 		if (characteristic != nullptr) {
 			// create IBuffer from data
 			DataWriter writer;
-			writer.WriteBytes(array_view<uint8_t const> (data->buf, data->buf + data->size));
+			writer.WriteBytes(array_view<uint8_t const> (data.buf, data.buf + data.size));
 			IBuffer buffer = writer.DetachBuffer();
 			auto status = co_await characteristic.WriteValueAsync(buffer, GattWriteOption::WriteWithoutResponse);
 			if (status != GattCommunicationStatus::Success)
-				saveError(L"%s:%d Error subscribing to characteristic with uuid %s", __WFILE__, __LINE__, data->characteristicUuid);
-			else
+				saveError(L"%s:%d Error writing value to characteristic with uuid %s", __WFILE__, __LINE__, data.characteristicUuid);
+			else if (result != 0)
 				*result = true;
 		}
 	}
@@ -545,15 +544,18 @@ fire_and_forget SendDataAsync(BLEData* data, condition_variable& signal, bool* r
 	{
 		saveError(L"%s:%d SendDataAsync catch: %s", __WFILE__, __LINE__, ex.message().c_str());
 	}
-	signal.notify_one();
+	if (signal != 0)
+		signal->notify_one();
 }
-bool SendData(BLEData* data) {
+bool SendData(BLEData* data, bool block) {
 	mutex _mutex;
 	unique_lock<mutex> lock(_mutex);
 	condition_variable signal;
-	bool result;
-	SendDataAsync(data, signal, &result);
-	signal.wait(lock);
+	bool result = false;
+	// copy data to stack so that caller can free its memory in non-blocking mode
+	SendDataAsync(*data, block ? &signal : 0, block ? &result : 0);
+	if (block)
+		signal.wait(lock);
 
 	return result;
 }
