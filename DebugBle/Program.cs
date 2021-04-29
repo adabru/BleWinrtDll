@@ -15,6 +15,7 @@ namespace DebugBle
 
             BLE ble = new BLE();
             string deviceId = null;
+
             BLE.BLEScan scan = BLE.ScanDevices();
             scan.Found = (_deviceId, deviceName) =>
             {
@@ -30,6 +31,7 @@ namespace DebugBle
             };
             while (deviceId == null)
                 Thread.Sleep(500);
+
             scan.Cancel();
             if (deviceId == "-1")
             {

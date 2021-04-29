@@ -12,12 +12,19 @@ The `Demo.scene` in this repo uses non-blocking calls to avoid creating Threads.
 
 There is a prebuilt dll included in this repo, `BleWinrtDll Unity\Assets\BleWinrtDll.dll` or `DebugBle\BleWinrtDll.dll` (both are the same). But you can also build the dll yourself in VisualStudio. Follow these steps:
 
-- Open the file BleWinrtDll.sln with VisualStudio (tested with Community 2019). You may be asked install VisualStudio components when you open the project. The needed components are C++ Desktop and UWP.
+- Open the file BleWinrtDll.sln with VisualStudio (tested with Community 2019). You may be asked to install VisualStudio components when you open the project. The needed components are C++ Desktop and UWP, or if you want to save space, just the single components "MSVC C++ Buildtools", "Windows 10 SDK", ".NET Framework 4.7.2 SDK".
 - Choose configuration "Release" and "x64" (I think it must match your machine architecture).
 - In the project explorer, right-click the project "BleWinrtDll" and choose "Compile".
 - Wait until the compilation finishes successfully.
 
 Now you find the file `BleWinrtDll.dll` in the folder `x64/Release`. You can copy this dll into your Unity-project. To try it out, you can also copy the file into the `DebugBle` folder (replacing the existing file) and start the DebugBle project. If your computer has bluetooth enabled, you should see some scanned bluetooth devices. If you modify the file `DebugBle/Program.cs` and change the device name, service UUID and characteristic UUIDs to match your specific BLE device, you should also receive some packages from your BLE device.
+
+## Alternatives
+[win32 Bluetooth API](https://docs.microsoft.com/en-us/windows/win32/api/_bluetooth/), as used by <https://github.com/DerekGn/WinBle> (thanks to david-sackstein).
+
+[Bluetooth Framework](https://www.btframework.com/bluetoothframework.htm) by Soft Service Company. It is paid and you can get support. You also find answers on stackoverflow.
+
+If you find more, you are welcome to report them, e.g. via opening an issue.
 
 ## Background
 
