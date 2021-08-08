@@ -23,6 +23,8 @@ public class BleApi
         public string name;
         [MarshalAs(UnmanagedType.I1)]
         public bool nameUpdated;
+        [MarshalAs(UnmanagedType.I4)]
+        public int signalStrength;
     }
 
     [DllImport("BleWinrtDll.dll", EntryPoint = "StartDeviceScan")]

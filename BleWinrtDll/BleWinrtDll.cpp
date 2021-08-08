@@ -242,6 +242,9 @@ void DeviceWatcher_Updated(DeviceWatcher sender, DeviceInformationUpdate deviceI
 		deviceUpdate.isConnectable = unbox_value<bool>(deviceInfoUpdate.Properties().Lookup(L"System.Devices.Aep.Bluetooth.Le.IsConnectable"));
 		deviceUpdate.isConnectableUpdated = true;
 	}
+	if(deviceInfoUpdate.Properties().HasKey(L"System.Devices.Aep.SignalStrength")) {
+		deviceUpdate.signalStrength = unbox_value<int32_t>(deviceInfoUpdate.Properties().Lookup(L"System.Devices.Aep.SignalStrength"));
+	}
 	{
 		lock_guard lock(quitLock);
 		if (quitFlag)
@@ -265,7 +268,7 @@ void StartDeviceScan() {
 		clearError();
 	}
 
-	IVector<hstring> requestedProperties = single_threaded_vector<hstring>({ L"System.Devices.Aep.DeviceAddress", L"System.Devices.Aep.IsConnected", L"System.Devices.Aep.Bluetooth.Le.IsConnectable" });
+	IVector<hstring> requestedProperties = single_threaded_vector<hstring>({ L"System.Devices.Aep.DeviceAddress", L"System.Devices.Aep.IsConnected", L"System.Devices.Aep.Bluetooth.Le.IsConnectable" , L"System.Devices.Aep.SignalStrength"});
 	hstring aqsAllBluetoothLEDevices = L"(System.Devices.Aep.ProtocolId:=\"{bb7bb05e-5972-42b5-94fc-76eaa7084d49}\")"; // list Bluetooth LE devices
 	deviceWatcher = DeviceInformation::CreateWatcher(
 		aqsAllBluetoothLEDevices,
