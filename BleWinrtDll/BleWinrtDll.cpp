@@ -224,6 +224,9 @@ void DeviceWatcher_Added(DeviceWatcher sender, DeviceInformation deviceInfo) {
 		deviceUpdate.isConnectable = unbox_value<bool>(deviceInfo.Properties().Lookup(L"System.Devices.Aep.Bluetooth.Le.IsConnectable"));
 		deviceUpdate.isConnectableUpdated = true;
 	}
+	if (deviceInfoUpdate.Properties().HasKey(L"System.Devices.Aep.SignalStrength")) {
+		deviceUpdate.signalStrength = unbox_value<int32_t>(deviceInfoUpdate.Properties().Lookup(L"System.Devices.Aep.SignalStrength"));
+	}
 	{
 		lock_guard lock(quitLock);
 		if (quitFlag)
