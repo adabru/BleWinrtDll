@@ -12,7 +12,7 @@ The `Demo.scene` in this repo uses non-blocking calls to avoid creating Threads.
 
 There is a prebuilt dll included in this repo, `BleWinrtDll Unity\Assets\BleWinrtDll.dll` or `DebugBle\BleWinrtDll.dll` (both are the same). But you can also build the dll yourself in VisualStudio. Follow these steps:
 
-- Open the file BleWinrtDll.sln with VisualStudio (tested with Community 2019). You may be asked to install VisualStudio components when you open the project. The needed components are C++ Desktop and UWP, or if you want to save space, just the single components "MSVC C++ Buildtools", "Windows 10 SDK", ".NET Framework 4.7.2 SDK".
+- Open the file BleWinrtDll.sln with VisualStudio (tested with Community 2019). You may be asked to install VisualStudio components when you open the project. The needed components are C++ Desktop and UWP, or if you want to save space, just the single components "MSVC C++ Buildtools", "Windows 10 SDK"/"Windows 11 SDK" (depending on your os), ".NET Framework 4.7.2 SDK".
 - Choose configuration "Release" and "x64" (I think it must match your machine architecture).
 - In the project explorer, right-click the project "BleWinrtDll" and choose "Compile".
 - If you run into the error `wait_for is not a member of winrt::impl`, follow the steps on https://github.com/adabru/BleWinrtDll/issues/16 and leave a thumbs up. If enough thumbs accumulate, someone or me will try to make that more convenient.
