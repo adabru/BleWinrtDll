@@ -22,6 +22,20 @@ There is a prebuilt dll included in this repo, `BleWinrtDll Unity\Assets\BleWinr
 
 Now you find the file `BleWinrtDll.dll` in the folder `x64/Release`. You can copy this dll into your Unity-project. To try it out, you can also copy the file into the `DebugBle` folder (replacing the existing file) and start the DebugBle project. If your computer has bluetooth enabled, you should see some scanned bluetooth devices. If you modify the file `DebugBle/Program.cs` and change the device name, service UUID and characteristic UUIDs to match your specific BLE device, you should also receive some packages from your BLE device.
 
+## FAQ
+
+> Q: I try to read data but nothing is returned.
+
+This dll doesn't implement ReadValue. You can add it yourself, see https://github.com/adabru/BleWinrtDll/issues/45#issuecomment-1479295183 . This dll implements SubscribeValue. After the subscription you can poll for data updates.
+
+> Q: Sending data to the device does not work.
+
+Try replacing `WriteWithoutResponse` with `WriteWithResponse` (https://github.com/adabru/BleWinrtDll/issues/66#issuecomment-2159524703).
+
+> Q: I want to run it on HoloLens 2.
+
+You need specific configuration for that. See https://github.com/adabru/BleWinrtDll/issues/23 on how to do that.
+
 ## Alternatives
 [win32 Bluetooth API](https://docs.microsoft.com/en-us/windows/win32/api/_bluetooth/), as used by <https://github.com/DerekGn/WinBle> (thanks to david-sackstein).
 
