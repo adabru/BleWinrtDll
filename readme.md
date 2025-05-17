@@ -26,15 +26,23 @@ Now you find the file `BleWinrtDll.dll` in the folder `x64/Release`. You can cop
 
 > Q: I try to read data but nothing is returned.
 
-This dll doesn't implement ReadValue. You can add it yourself, see https://github.com/adabru/BleWinrtDll/issues/45#issuecomment-1479295183 . This dll implements SubscribeValue. After the subscription you can poll for data updates.
+This dll doesn't implement ReadValue. You can add it yourself, see https://github.com/adabru/BleWinrtDll/issues/45#issuecomment-1479295183 . This dll implements SubscribeValue. After the subscription, you can poll for data updates.
 
 > Q: Sending data to the device does not work.
 
-Try replacing `WriteWithoutResponse` with `WriteWithResponse` (https://github.com/adabru/BleWinrtDll/issues/66#issuecomment-2159524703).
+Try replacing `WriteWithoutResponse` with `WriteWithResponse`, see https://github.com/adabru/BleWinrtDll/issues/66#issuecomment-2159524703.
 
 > Q: I want to run it on HoloLens 2.
 
 You need specific configuration for that. See https://github.com/adabru/BleWinrtDll/issues/23 on how to do that.
+
+> Q: The connection only works the first time. Further connection attempts result in errors, even when restarting the app.
+
+Make sure you call `BleApi.Quit()` to free the connection. You can try disabling and enabling your Bluetooth hardware to clear active handles. 
+
+> Q: I want to disconnect from a single device.
+
+This dll only implements the disconnect from all devices. If you need to disconnect from a single device, see https://github.com/adabru/BleWinrtDll/issues/70#issuecomment-2857922743.
 
 ## Alternatives
 [win32 Bluetooth API](https://docs.microsoft.com/en-us/windows/win32/api/_bluetooth/), as used by <https://github.com/DerekGn/WinBle> (thanks to david-sackstein).
