@@ -483,11 +483,32 @@ fire_and_forget SubscribeCharacteristicAsync(wchar_t* deviceId, wchar_t* service
 	try {
 		auto characteristic = co_await retrieveCharacteristic(deviceId, serviceId, characteristicId);
 		if (characteristic != nullptr) {
-			auto status = co_await characteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue::Notify);
+
+			// --- START OF AUTOMATIC DETECTION (SMART SUBSCRIBE) ---
+			auto properties = characteristic.CharacteristicProperties();
+			GattClientCharacteristicConfigurationDescriptorValue cccdValue = GattClientCharacteristicConfigurationDescriptorValue::None;
+
+			if ((properties & GattCharacteristicProperties::Indicate) == GattCharacteristicProperties::Indicate) {
+				cccdValue = GattClientCharacteristicConfigurationDescriptorValue::Indicate;
+			}
+			else if ((properties & GattCharacteristicProperties::Notify) == GattCharacteristicProperties::Notify) {
+				cccdValue = GattClientCharacteristicConfigurationDescriptorValue::Notify;
+			}
+			else {
+				// The feature does not support either Notify or Indicate
+				if (result != 0) *result = false;
+				subscribeQueueSignal.notify_one();
+				co_return;
+			}
+			// --- END OF AUTO-DETECTION ---
+
+			// We use the cccdValue variable instead of the hard-coded “Notify”
+			auto status = co_await characteristic.WriteClientCharacteristicConfigurationDescriptorAsync(cccdValue);
+
 			if (status != GattCommunicationStatus::Success)
 				saveError(L"%s:%d Error subscribing to characteristic with uuid %s and status %d", __WFILE__, __LINE__, characteristicId, status);
 			else {
-				Subscription *subscription = new Subscription();
+				Subscription* subscription = new Subscription();
 				subscription->characteristic = characteristic;
 				subscription->revoker = characteristic.ValueChanged(auto_revoke, &Characteristic_ValueChanged);
 				subscriptions.push_back(subscription);
@@ -502,6 +523,7 @@ fire_and_forget SubscribeCharacteristicAsync(wchar_t* deviceId, wchar_t* service
 	}
 	subscribeQueueSignal.notify_one();
 }
+
 bool SubscribeCharacteristic(wchar_t* deviceId, wchar_t* serviceId, wchar_t* characteristicId, bool block) {
 	unique_lock<mutex> lock(subscribeQueueLock);
 	bool result = false;
@@ -531,7 +553,7 @@ fire_and_forget SendDataAsync(BLEData data, condition_variable* signal, bool* re
 		if (characteristic != nullptr) {
 			// create IBuffer from data
 			DataWriter writer;
-			writer.WriteBytes(array_view<uint8_t const> (data.buf, data.buf + data.size));
+			writer.WriteBytes(array_view<uint8_t const>(data.buf, data.buf + data.size));
 			IBuffer buffer = writer.DetachBuffer();
 			auto status = co_await characteristic.WriteValueAsync(buffer, GattWriteOption::WriteWithoutResponse);
 			if (status != GattCommunicationStatus::Success)
