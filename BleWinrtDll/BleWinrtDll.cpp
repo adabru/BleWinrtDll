@@ -484,7 +484,7 @@ fire_and_forget SubscribeCharacteristicAsync(wchar_t* deviceId, wchar_t* service
 		auto characteristic = co_await retrieveCharacteristic(deviceId, serviceId, characteristicId);
 		if (characteristic != nullptr) {
 
-			// --- START OF AUTOMATIC DETECTION (SMART SUBSCRIBE) ---
+			// auto-detect characteristic type: notify or indicate
 			auto properties = characteristic.CharacteristicProperties();
 			GattClientCharacteristicConfigurationDescriptorValue cccdValue = GattClientCharacteristicConfigurationDescriptorValue::None;
 
@@ -496,13 +496,10 @@ fire_and_forget SubscribeCharacteristicAsync(wchar_t* deviceId, wchar_t* service
 			}
 			else {
 				// The feature does not support either Notify or Indicate
-				if (result != 0) *result = false;
-				subscribeQueueSignal.notify_one();
-				co_return;
+				throw hresult_invalid_argument(L"Characteristic does not support Notify or Indicate");
 			}
-			// --- END OF AUTO-DETECTION ---
 
-			// We use the cccdValue variable instead of the hard-coded “Notify”
+			// We use the cccdValue variable instead of the hard-coded "Notify"
 			auto status = co_await characteristic.WriteClientCharacteristicConfigurationDescriptorAsync(cccdValue);
 
 			if (status != GattCommunicationStatus::Success)

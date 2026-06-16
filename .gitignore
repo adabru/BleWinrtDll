@@ -1,4 +1,3 @@
-
 .vs/
 bin/
 obj/
@@ -6,3 +5,8 @@ Debug/
 x64/
 
 *.aps
+
+# NuGet packages
+packages/
+*.nupkg
+.nuget/
