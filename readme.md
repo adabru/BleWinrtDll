@@ -10,13 +10,13 @@ If you distribute a Windows Standalone build to a different device, please ensur
 
 ## Install
 
-Open Unity Package Manager in your project. Click **Install package from git URL**. Enter https://github.com/adabru/BleWinrtDll.git?path=/BleWinrtDll-UnityPackage and confirm. 
+Open Unity Package Manager in your project. Click **Install package from git URL**. Enter <https://github.com/adabru/BleWinrtDll.git?path=/BleWinrtDll-UnityPackage> and confirm.
 
-<img width="200" height="297" alt="image" src="https://github.com/user-attachments/assets/2f155699-43e4-49c8-9c1e-88e36a2de5df" />
+<img width="200" alt="image" src="https://github.com/user-attachments/assets/2f155699-43e4-49c8-9c1e-88e36a2de5df" />
 
 Wait for the installation. Import the sample.
 
-<img width="400" height="399" alt="image" src="https://github.com/user-attachments/assets/50bc9440-c914-420f-893c-0ec18ced1140" />
+<img width="400" alt="image" src="https://github.com/user-attachments/assets/50bc9440-c914-420f-893c-0ec18ced1140" />
 
 Open the scene **Demo.unity**. Press play. Ensure your Bluetooth is turned on.
 
@@ -27,7 +27,6 @@ There is a prebuilt dll included in this repo, `BleWinrtDll Unity\Assets\BleWinr
 - Open the file BleWinrtDll.sln with VisualStudio (tested with Community 2019). You may be asked to install VisualStudio components when you open the project. The needed components are C++ Desktop and UWP, or if you want to save space, just the single components "MSVC C++ Buildtools", "Windows 10 SDK"/"Windows 11 SDK" (depending on your os), ".NET Framework 4.7.2 SDK".
 - Choose configuration "Release" and "x64" (I think it must match your machine architecture).
 - In the project explorer, right-click the project "BleWinrtDll" and choose "Compile".
-- If you run into the error `wait_for is not a member of winrt::impl`, follow the steps on https://github.com/adabru/BleWinrtDll/issues/16 and leave a thumbs up. If enough thumbs accumulate, someone or me will try to make that more convenient.
 - Wait until the compilation finishes successfully.
 
 Now you find the file `BleWinrtDll.dll` in the folder `x64/Release`. You can copy this dll into your Unity-project. To try it out, you can also copy the file into the `DebugBle` folder (replacing the existing file) and start the DebugBle project. If your computer has bluetooth enabled, you should see some scanned bluetooth devices. If you modify the file `DebugBle/Program.cs` and change the device name, service UUID and characteristic UUIDs to match your specific BLE device, you should also receive some packages from your BLE device.
@@ -36,25 +35,26 @@ Now you find the file `BleWinrtDll.dll` in the folder `x64/Release`. You can cop
 
 > Q: I try to read data but nothing is returned.
 
-This dll doesn't implement ReadValue. You can add it yourself, see https://github.com/adabru/BleWinrtDll/issues/45#issuecomment-1479295183 . This dll implements SubscribeValue. After the subscription, you can poll for data updates.
+This dll doesn't implement ReadValue. You can add it yourself, see <https://github.com/adabru/BleWinrtDll/issues/45#issuecomment-1479295183> . This dll implements SubscribeValue. After the subscription, you can poll for data updates.
 
 > Q: Sending data to the device does not work.
 
-Try replacing `WriteWithoutResponse` with `WriteWithResponse`, see https://github.com/adabru/BleWinrtDll/issues/66#issuecomment-2159524703.
+Try replacing `WriteWithoutResponse` with `WriteWithResponse`, see <https://github.com/adabru/BleWinrtDll/issues/66#issuecomment-2159524703>.
 
 > Q: I want to run it on HoloLens 2.
 
-You need specific configuration for that. See https://github.com/adabru/BleWinrtDll/issues/23 on how to do that.
+You need specific configuration for that. See <https://github.com/adabru/BleWinrtDll/issues/23> on how to do that.
 
 > Q: The connection only works the first time. Further connection attempts result in errors, even when restarting the app.
 
-Make sure you call `BleApi.Quit()` to free the connection. You can try disabling and enabling your Bluetooth hardware to clear active handles. 
+Make sure you call `BleApi.Quit()` to free the connection. You can try disabling and enabling your Bluetooth hardware to clear active handles.
 
 > Q: I want to disconnect from a single device.
 
-This dll only implements the disconnect from all devices. If you need to disconnect from a single device, see https://github.com/adabru/BleWinrtDll/issues/70#issuecomment-2857922743.
+This dll only implements the disconnect from all devices. If you need to disconnect from a single device, see <https://github.com/adabru/BleWinrtDll/issues/70#issuecomment-2857922743>.
 
 ## Alternatives
+
 [win32 Bluetooth API](https://docs.microsoft.com/en-us/windows/win32/api/_bluetooth/), as used by <https://github.com/DerekGn/WinBle> (thanks to david-sackstein).
 
 [Bluetooth Framework](https://www.btframework.com/bluetoothframework.htm) by Soft Service Company. It is paid and you can get support. You also find answers on stackoverflow.
